@@ -238,3 +238,23 @@ func BenchmarkArchishmanSengConsistentHash(b *testing.B) {
 		ch.IncreaseLoad(ctx, host)
 	}
 }
+
+func BenchmarkBuraksezerConsistent(b *testing.B) {
+	cfg := consistent.Config{
+		PartitionCount:    103,
+		ReplicationFactor: 5,
+		Load:              1.25,
+		Hasher:            hasher{},
+	}
+	c := consistent.New(nil, cfg)
+
+	for _, host := range hosts {
+		c.Add(myMember(host))
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		c.LocateKey([]byte(fmt.Sprintf("key%d", i)))
+	}
+}
